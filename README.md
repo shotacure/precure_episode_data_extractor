@@ -1,0 +1,2 @@
+# precure_episode_data_extractor
+プリキュアの放送データを公式から取得する
