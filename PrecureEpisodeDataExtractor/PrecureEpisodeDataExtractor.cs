@@ -149,6 +149,13 @@ class PrecureEpisodeDataExtractor
         // 美術
         var art = ExtractTextBetween(episodeData, "美術：", "<").Trim();
 
+        // 連名対策
+        script = NormalizeNames(script);
+        storyboard = NormalizeNames(storyboard);
+        direction = NormalizeNames(direction);
+        animation = NormalizeNames(animation);
+        art = NormalizeNames(art);
+
         return new Episode
         {
             話数 = episodeId,
@@ -185,6 +192,27 @@ class PrecureEpisodeDataExtractor
             return allowEmpty ? string.Empty : throw new Exception($"End text '{endText}' not found.");
         }
         return text.Substring(startIndex, endIndex - startIndex).Trim();
+    }
+
+    /// <summary>
+    /// 連名クレジットのフォーマットを統一する
+    /// </summary>
+    /// <param name="text"></param>
+    /// <returns></returns>
+    static string NormalizeNames(string text)
+    {
+        // 「／」「/」「、」「・」で区切られた連名クレジットを一旦分離する（ただしカタカナに挟まれた「・」はTAPスタッフなので何もしない）
+        string pattern = @"(?<![ァ-ヶ])(?:／|/|、|(?<![ァ-ヶ])・(?![ァ-ヶ]))";
+        var parts = Regex.Split(text, pattern);
+
+        // 各部分をTrim
+        for (int i = 0; i < parts.Length; i++)
+        {
+            parts[i] = parts[i].Trim();
+        }
+
+        // 「／」で再結合
+        return string.Join("／", parts);
     }
 }
 
